@@ -5,7 +5,7 @@
 # Youtube Channel: https://goo.gl/fvkdwm 
 #=================================================
 
-name: 编译lean_op源码
+name: 全自动编译lean_op
 
 on: 
   release:
@@ -70,7 +70,7 @@ jobs:
         ./scripts/feeds install -a
         ./scripts/feeds install -a
 
-    - name: Configuration Customization - 编译lean_op源码
+    - name: Configuration Customization - 全自动编译lean_op
       env:
         CONFIG_FILE: 'x86_64.config'
       run: |
