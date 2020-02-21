@@ -15,7 +15,7 @@ on:
    # branches:
    #  - master
     paths:
-      - 'lean_x86_x64'
+      - 'lean_x86_64.config'
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
@@ -24,7 +24,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: lean_x86_x64.config
+  CONFIG_FILE: lean_x86_64.config
   DIY_SH: diy.sh
   FREE_UP_DISK: false
   SSH_ACTIONS: true
