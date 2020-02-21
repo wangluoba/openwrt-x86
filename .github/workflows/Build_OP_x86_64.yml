@@ -69,11 +69,11 @@ jobs:
     - name: Update & Install feeds
       working-directory: ./openwrt
       run: |
-        #cp feeds.conf.default feeds.conf
-        echo -e '\nsrc-git lienol https://github.com/Lienol/openwrt-package' >> feeds.conf.default
-        #cat feeds.conf
-        echo 'start feeds update lienol'
-        ./scripts/feeds update lienol 
+        cp feeds.conf.default feeds.conf
+        echo -e '\nsrc-git custom https://github.com/Lienol/openwrt-package' >> feeds.conf
+        cat feeds.conf
+        echo 'start feeds update custom'
+        ./scripts/feeds update  custom
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         # Add other app
