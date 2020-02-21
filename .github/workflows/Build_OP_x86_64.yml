@@ -103,7 +103,7 @@ jobs:
     - name : Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: Lienol OpenWrt
+        name: lean OpenWrt
         path: openwrt/bin
 
 
