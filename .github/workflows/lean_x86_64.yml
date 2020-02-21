@@ -11,9 +11,9 @@ name: lean_Build OpenWrt
 on:
   release:
     types: [published]
-  #push:
-   # branches:
-   #  - master
+  push:
+    branches:
+     - master
     paths:
       - 'lean_x86_64.config'
 #  schedule:
