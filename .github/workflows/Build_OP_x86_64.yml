@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com  
 #=================================================
 
-name:  测试是否运行
+name:  自动编译lean源码
 
 on:
   release:
@@ -79,7 +79,7 @@ jobs:
         # Add other app
         # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
 
-    - name: Configuration Customization - 测试是否运行
+    - name: Configuration Customization - 自动编译lean源码
       env:
         CONFIG_FILE: 'x86_64.config'
       run: |
