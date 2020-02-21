@@ -63,12 +63,19 @@ jobs:
 
     - name: Clone source code
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+      
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        #cp feeds.conf.default feeds.conf
+        echo -e '\nssrc-git lienol https://github.com/Lienol/openwrt-package' >> feeds.conf.default
+        #cat feeds.conf
+        echo 'start feeds update lienol'
+        ./scripts/feeds update  lienol
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        # Add other app
+        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
 
     - name: Load custom configuration
       run: |
