@@ -6,13 +6,13 @@
 # Blog: https://p3terx.com  
 #=================================================
 
-name: lean_x86_64手动配置
+name: lean手动配置
 
 on:
   release:
     types: [published]
   push:
-    branches: 
+    branches:
       - master
     paths:
       - 'lean_x86_64.config'
