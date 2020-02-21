@@ -6,25 +6,25 @@
 # Blog: https://p3terx.com  
 #=================================================
 
-name: Build OpenWrt
+name: lean_Build OpenWrt
 
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - master
+  #push:
+   # branches:
+   #  - master
     paths:
-      - 'test.config'
+      - 'lean_x86_x64'
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
     types: [started]
 
 env:
-  REPO_URL: https://github.com/Lienol/openwrt
-  REPO_BRANCH: dev-19.07
-  CONFIG_FILE: test.config
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  CONFIG_FILE: lean_x86_x64.config
   DIY_SH: diy.sh
   FREE_UP_DISK: false
   SSH_ACTIONS: true
