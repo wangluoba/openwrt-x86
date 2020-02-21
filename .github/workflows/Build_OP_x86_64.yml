@@ -11,9 +11,9 @@ name:  自动编译lean源码
 on:
   release:
     types: [published]
-  #push:
-  #  branches:
-  #   - master
+  push:
+    branches:
+     - master
     paths:
       - 'x86_64.config'
 #  schedule:
