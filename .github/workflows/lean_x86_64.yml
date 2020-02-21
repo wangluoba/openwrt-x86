@@ -12,8 +12,8 @@ on:
   release:
     types: [published]
   push:
-    branches:
-     - master
+    branches: 
+      - master
     paths:
       - 'lean_x86_64.config'
 #  schedule:
