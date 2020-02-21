@@ -70,10 +70,10 @@ jobs:
       working-directory: ./openwrt
       run: |
         #cp feeds.conf.default feeds.conf
-        #echo -e '\nsrc-git custom https://github.com/k-szuster/luci-access-control-package.git' >> feeds.conf
+        echo -e '\nsrc-git lienol https://github.com/Lienol/openwrt-package' >> feeds.conf.default
         #cat feeds.conf
-        #echo 'start feeds update custom'
-        ./scripts/feeds update custom 
+        echo 'start feeds update lienol'
+        ./scripts/feeds update lienol 
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         # Add other app
