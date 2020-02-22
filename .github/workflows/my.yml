@@ -10,8 +10,8 @@
 name: OpenWr定制配置
 
 on: 
-  release:
-    types: [published]
+  #release:
+  #  types: [published]
 
   push:
     branches: 
