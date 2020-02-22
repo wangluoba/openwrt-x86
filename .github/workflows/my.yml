@@ -52,8 +52,15 @@ jobs:
           # ln -s /mnt/openwrt/staging_dir ./staging_dir
 
           df -h
-
+          
+      - name: Clone source code
+        env: 
+          REPO_URL: https://github.com/coolsnowwolf/lede
+          REPO_BRANCH: master
+          run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+      
       - name: Update feeds
+        working-directory: ./openwrt
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
@@ -97,11 +104,11 @@ jobs:
           # 
 
           # 编译x64固件:
-          # cat >> .config <<EOF
-          # CONFIG_TARGET_x86=y
-          # CONFIG_TARGET_x86_64=y
-          # CONFIG_TARGET_x86_64_Generic=y
-          # EOF
+           cat >> .config <<EOF
+           CONFIG_TARGET_x86=y
+           CONFIG_TARGET_x86_64=y
+           CONFIG_TARGET_x86_64_Generic=y
+           EOF  
 
           # 固件压缩:
           # cat >> .config <<EOF
@@ -200,6 +207,7 @@ jobs:
           df -h
 
       - name: Compile firmware
+        working-directory: ./openwrt
         run: |
           make -j$(nproc) || make -j1 V=s
           echo "======================="
