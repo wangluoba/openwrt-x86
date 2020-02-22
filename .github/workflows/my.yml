@@ -64,8 +64,7 @@ jobs:
     - name: Generate configuration file
       working-directory: ./openwrt
       run: |
-        rm -f ./.config*
-        touch ./.config
+        rm -f ./.config
           #
           # ========================固件定制部分========================
           # 
