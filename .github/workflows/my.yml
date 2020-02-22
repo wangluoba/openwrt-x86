@@ -15,9 +15,9 @@ on:
       - my
   #schedule:
   #  - cron: 0 16 * * *
-  #push:
-  #  branches:
-  #    - my
+  push:
+    branches:
+      - my
 
 jobs:
   build:
