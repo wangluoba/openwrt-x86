@@ -210,11 +210,13 @@ jobs:
           sed -i 's/^[ \t]*//g' ./.config
           make defconfig
     - name: Make download
+      working-directory: ./openwrt
       run: |
         make download -j$(nproc)
         find ./dl/ -size -1024c -exec rm -f {} \;
           df -h
     - name: Compile firmware
+      working-directory: ./openwrt
       run: |
         make -j$(nproc) || make -j1 V=s
         echo "======================="
