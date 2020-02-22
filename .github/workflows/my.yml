@@ -7,65 +7,59 @@
 # <https://github.com/KFERMercer/OpenWrt-CI>
 #
 
-name: OpenWr定制配置
+name: OpenWrt-CI
 
 on:
-  release:
-    types: [published]
   push:
-    branches:
+    branches: 
       - master
+  # schedule:
+  #   - cron: 0 20 * * *
+  # release:
+  #   types: [published]
 
-  #schedule:
-  #  - cron: 0 8 * * 5
-  
-  #watch:
-  #  types: [started]
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
-    if: github.event.repository.owner.id == github.event.sender.id
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
 
-    - name: Initialization environment
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo swapoff /swapfile
-        sudo rm -rf /swapfile /etc/apt/sources.list.d/*
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
-        curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          ref: master
 
-    - name: Free up disk space
-      if: env.FREE_UP_DISK == 'true'
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        docker rmi `docker images -q`
-        sudo -E apt-get -q purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        
-    - name: Clone source code
-      env: 
-        REPO_URL: https://github.com/coolsnowwolf/lede
-        REPO_BRANCH: master
-      run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-        
-    - name: Update & Install feeds
-      working-directory: ./openwrt
-      run: |
-         ./scripts/feeds update -a
-         ./scripts/feeds install -a
-         ./scripts/feeds install -a
+      - name: Space cleanup
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          docker rmi `docker images -q`
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+          sudo -E apt-get update
+          sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+          sudo -E apt-get -y autoremove --purge
+          sudo -E apt-get clean
 
-    - name: Generate configuration file
-      run: |
-          cd openwrt
+          # sudo mkdir -p -m 777 /mnt/openwrt/bin /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/dl /mnt/openwrt/feeds /mnt/openwrt/staging_dir
+          # ln -s /mnt/openwrt/bin ./bin
+          # mkdir -p ./build_dir/host && ln -s /mnt/openwrt/build_dir/host ./build_dir/host
+          # mkdir -p ./build_dir/host && ln -s /mnt/openwrt/build_dir/hostpkg ./build_dir/hostpkg
+          # ln -s /mnt/openwrt/dl ./dl
+          # ln -s /mnt/openwrt/feeds ./feeds
+          # ln -s /mnt/openwrt/staging_dir ./staging_dir
+
+          df -h
+
+      - name: Update feeds
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Generate configuration file
+        run: |
           rm -f ./.config*
           touch ./.config
 
@@ -103,11 +97,11 @@ jobs:
           # 
 
           # 编译x64固件:
-           cat >> .config <<EOF
-           CONFIG_TARGET_x86=y
-           CONFIG_TARGET_x86_64=y
-           CONFIG_TARGET_x86_64_Generic=y
-           EOF
+          # cat >> .config <<EOF
+          # CONFIG_TARGET_x86=y
+          # CONFIG_TARGET_x86_64=y
+          # CONFIG_TARGET_x86_64_Generic=y
+          # EOF
 
           # 固件压缩:
           # cat >> .config <<EOF
@@ -196,23 +190,32 @@ jobs:
           # ========================固件定制部分结束========================
           # 
 
+          sed -i 's/^[ \t]*//g' ./.config
+          make defconfig
 
-    - name: Download package
-      working-directory: ./openwrt
-      run: |
-        make download -j$(nproc)
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
+      - name: Make download
+        run: |
+          make download -j8
+          find ./dl/ -size -1024c -exec rm -f {} \;
+          df -h
 
+      - name: Compile firmware
+        run: |
+          make -j$(nproc) || make -j1 V=s
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          du -h --max-depth=1 ./build_dir
+          du -h --max-depth=1 ./bin
 
-    - name: Build firmware
-      working-directory: ./openwrt
-      run: |
-          echo -e "$(nproc) thread build."
-          make -j$(nproc) V=s
+      - name: Prepare artifact
+        run: find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
 
-    - name : Upload artifact
-      uses: actions/upload-artifact@master
-      with:
-          name: lean_openwrt固件定制
-          path: openwrt/bin
+      - name: Upload artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: OpenWrt firmware
+          path: ./bin/targets/
