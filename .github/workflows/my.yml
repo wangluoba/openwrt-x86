@@ -65,6 +65,7 @@ jobs:
 
     - name: Generate configuration file
       run: |
+          cd openwrt
           rm -f ./.config*
           touch ./.config
 
@@ -196,7 +197,7 @@ jobs:
           # 
 
           sed -i 's/^[ \t]*//g' ./.config
-          
+          make defconfig
 
     - name: Download package
       working-directory: ./openwrt
