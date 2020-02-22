@@ -103,5 +103,5 @@ jobs:
     - name : Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: Lienol OpenWrt
+        name: Lienol OpenWrt_mir3g
         path: openwrt/bin
