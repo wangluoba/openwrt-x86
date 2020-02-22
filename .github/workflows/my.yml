@@ -10,14 +10,15 @@
 name: My-OpenWrt-CI
 
 on:
-  pull_request:
-    branches:
-      - my
-  #schedule:
-  #  - cron: 0 16 * * *
+  release:
+    types: [published]
   push:
     branches:
-      - my
+     - master
+#  schedule:
+#    - cron: 0 8 * * 5
+  watch:
+    types: [started]
 
 jobs:
   build:
