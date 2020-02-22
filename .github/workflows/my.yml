@@ -222,7 +222,7 @@ jobs:
           # 
           # ========================固件定制部分结束========================
           # 
-          chmod +x $DIY_SH
+          chmod +x ../$DIY_SH
           ../$DIY_SH
           make defconfig
           
