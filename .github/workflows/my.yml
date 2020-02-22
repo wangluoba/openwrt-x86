@@ -9,13 +9,12 @@
 
 name: OpenWr定制配置
 
-on: 
-  #release:
-  #  types: [published]
-
-  push:
-    branches: 
-      - master
+on:
+  release:
+    types: [published]
+  #push:
+  #  branches:
+  #    - master
 
   #schedule:
   #  - cron: 0 8 * * 5
