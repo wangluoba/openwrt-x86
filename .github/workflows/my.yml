@@ -21,56 +21,50 @@ on:
   
   #watch:
   #  types: [started]
-
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
+    if: github.event.repository.owner.id == github.event.sender.id
     steps:
+    - name: Checkout
+      uses: actions/checkout@master
 
-      - name: Checkout
-        uses: actions/checkout@master
-        with:
-          ref: master
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo swapoff /swapfile
+        sudo rm -rf /swapfile /etc/apt/sources.list.d/*
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+        curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
 
-      - name: Space cleanup
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          docker rmi `docker images -q`
-          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
-          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
-          sudo -E apt-get update
-          sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
-          sudo -E apt-get -y autoremove --purge
-          sudo -E apt-get clean
-
-          # sudo mkdir -p -m 777 /mnt/openwrt/bin /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/dl /mnt/openwrt/feeds /mnt/openwrt/staging_dir
-          # ln -s /mnt/openwrt/bin ./bin
-          # mkdir -p ./build_dir/host && ln -s /mnt/openwrt/build_dir/host ./build_dir/host
-          # mkdir -p ./build_dir/host && ln -s /mnt/openwrt/build_dir/hostpkg ./build_dir/hostpkg
-          # ln -s /mnt/openwrt/dl ./dl
-          # ln -s /mnt/openwrt/feeds ./feeds
-          # ln -s /mnt/openwrt/staging_dir ./staging_dir
-
-          df -h
-      - name: Clone source code
-        env:
-          REPO_URL: https://github.com/coolsnowwolf/lede
-          REPO_BRANCH: master
-        run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+    - name: Free up disk space
+      if: env.FREE_UP_DISK == 'true'
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        docker rmi `docker images -q`
+        sudo -E apt-get -q purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
         
-      - name: Update & Install feeds
-        working-directory: ./openwrt
-        run: |
+    - name: Clone source code
+      env: 
+        REPO_URL: https://github.com/coolsnowwolf/lede
+        REPO_BRANCH: master
+      run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
          ./scripts/feeds update -a
          ./scripts/feeds install -a
          ./scripts/feeds install -a
 
-      - name: Generate configuration file
-        run: |
+    - name: Generate configuration file
+      run: |
           rm -f ./.config*
           touch ./.config
 
@@ -204,20 +198,22 @@ jobs:
           sed -i 's/^[ \t]*//g' ./.config
           
 
-      - name: Make download
-        working-directory: ./openwrt
-        run: |
-          make download -j$(nproc)
-          find dl -size -1024c -exec ls -l {} \;
+    - name: Download package
+      working-directory: ./openwrt
+      run: |
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
 
-      - name: Build firmware
-        working-directory: ./openwrt
-        run: |
+
+    - name: Build firmware
+      working-directory: ./openwrt
+      run: |
           echo -e "$(nproc) thread build."
           make -j$(nproc) V=s
 
-      - name : Upload artifact
-        uses: actions/upload-artifact@master
-        with:
+    - name : Upload artifact
+      uses: actions/upload-artifact@master
+      with:
           name: lean_openwrt固件定制
           path: openwrt/bin
