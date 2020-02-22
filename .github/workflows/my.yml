@@ -12,9 +12,9 @@ name: My-OpenWrt-CI
 on:
   release:
     types: [published]
-  push:
-    branches:
-     - master
+  #push:
+    #branches:
+     #- master
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
@@ -221,7 +221,8 @@ jobs:
           # 
           # ========================固件定制部分结束========================
           # 
-          sed -i 's/^[ \t]*//g' ./.config
+          chmod +x $DIY_SH
+          ../$DIY_SH
           make defconfig
           
     - name: Download package
