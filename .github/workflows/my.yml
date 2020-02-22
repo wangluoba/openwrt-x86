@@ -196,8 +196,6 @@ jobs:
           # ========================固件定制部分结束========================
           # 
 
-          sed -i 's/^[ \t]*//g' ./.config
-          make defconfig
 
     - name: Download package
       working-directory: ./openwrt
